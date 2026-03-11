@@ -80,10 +80,10 @@ print(histogram);
 // 7. Apply Flood Threshold
 // ------------------------------------
 
-var floodExtent_1 = difference.lt(-1).selfMask().rename("Water"); //conservative
-var floodExtent_05 = difference.lt(-0.5).selfMask().rename("Water05"); //less strict
+var floodExtent_2 = difference.lt(-2).selfMask().rename("Water"); //conservative
+var floodExtent_1 = difference.lt(-1).selfMask().rename("Water1"); //less strict
 
-Map.addLayer(floodExtent_1, {palette:["blue"]}, "Initial Flood");
+Map.addLayer(floodExtent_2, {palette:["blue"]}, "Initial Flood");
 
 // ------------------------------------
 // 8. Apply Permanent Water Mask
@@ -91,7 +91,7 @@ Map.addLayer(floodExtent_1, {palette:["blue"]}, "Initial Flood");
 
 var gsw = ee.Image("JRC/GSW1_4/GlobalSurfaceWater");
 var permanentWater = gsw.select("seasonality").gte(6).clip(geometry);
-var floodNoWater =floodExtent_1.updateMask(permanentWater.not());
+var floodNoWater =floodExtent_2.updateMask(permanentWater.not());
 
 Map.addLayer(floodNoWater, {palette:["red"]}, "Water Masked Flood");
 
@@ -126,11 +126,11 @@ var floodedArea_1 = floodExtent_1.multiply(ee.Image.pixelArea())
                       bestEffort: true
                     });
                       
-var floodAreaSqKm_1 = ee.Number(floodedArea_1.get("Water")).divide(1e6);
+var floodAreaSqKm_1 = ee.Number(floodedArea_1.get("Water1")).divide(1e6);
 
 print("Flood Area_1 SqKm:", floodAreaSqKm_1);
 
-var floodExtent_05 = floodExtent_05.multiply(ee.Image.pixelArea())
+var floodExtent_2 = floodExtent_2.multiply(ee.Image.pixelArea())
                     .reduceRegion({
                       reducer:ee.Reducer.sum(), 
                       geometry: geometry, 
@@ -138,9 +138,9 @@ var floodExtent_05 = floodExtent_05.multiply(ee.Image.pixelArea())
                       bestEffort: true
                     });
                       
-var floodAreaSqKm_05 = ee.Number(floodExtent_05.get("Water05")).divide(1e6);
+var floodAreaSqKm_2 = ee.Number(floodExtent_2.get("Water")).divide(1e6);
 
-print("Flood Area_05 SqKm:", floodAreaSqKm_05);
+print("Flood Area_2 SqKm:", floodAreaSqKm_2);
 
 var floodedArea = flooded.multiply(ee.Image.pixelArea())
                     .reduceRegion({
